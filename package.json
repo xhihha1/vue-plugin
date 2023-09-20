@@ -1,0 +1,26 @@
+{
+  "name": "xhihha1-vue-plugin",
+  "version": "0.0.1",
+  "description": "learn how to create vue plugin component and push to npm.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xhihha1/vue-plugin.git"
+  },
+  "keywords": [
+    "vue",
+    "plugin"
+  ],
+  "author": "xhihha1",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xhihha1/vue-plugin/issues"
+  },
+  "homepage": "https://github.com/xhihha1/vue-plugin#readme",
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  }
+}
