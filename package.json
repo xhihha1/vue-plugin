@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/xhihha1/vue-plugin#readme",
   "peerDependencies": {
-    "vue": "^3.0.0"
+    "vue": "^3.0.0",
+    "axios": "^0.20.0"
   }
 }
