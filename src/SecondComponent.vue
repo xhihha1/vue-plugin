@@ -6,7 +6,7 @@
           <div class="aiBotLogoArea"><img class="aiBotLogo" src="./assets/Angulara.png" /></div>
             <div class="chatArea">
               <span class="contentSpan">
-                <span>您好，我是智能AI專家，歡迎您使用AI智能服務。</span>
+                <span>{{ helloworld }}</span>
                 <ul>
                   <li v-for="(message, index) in defaultMessage" :key="index" @click="pickMessage(message)">{{ message }}</li>
                 </ul>
@@ -28,7 +28,7 @@
       </div>
     </div>
     <div class="chatInputArea">
-      <div><span class="chatName">A</span></div>
+      <div><span class="chatName">{{ getFirstCharacter() }}</span></div>
         <div class="chatInputDiv">
           <input type="text" class="chatInput" placeholder="請輸入訊息" v-model="message" @keyup.enter="sendMessage"/>
         </div>
@@ -46,19 +46,37 @@
 import chatbotAPI from './api/chatbot'
 export default {
   props: {
-    api: { type: Object }
+    user: { type: Object },
+    api: { type: Object },
+    msg: {
+      type: Object
+    }
   },
   data() {
-    return {
-      startTime: "",
-      messages: [],
-      message: "",
-      defaultMessage:[
+    let helloworld = '您好，我是智能AI專家，歡迎您使用AI智能服務。';
+    let defaultMessageList = [
         "請問如何調整實際負載容量?",
         "該場域年度契約容量為何?",
         "請問哪台配備負載量最高?",
         "時間電價區間為何?",
-      ],
+    ];
+    let username = 'Guest';
+    if (this.msg && this.msg.helloworld) {
+      helloworld = this.msg.helloworld;
+    }
+    if (this.msg && Array.isArray(this.msg.list)) {
+      defaultMessageList = this.msg.list;
+    }
+    if (this.user && this.user.name) {
+      username = this.user.name;
+    }
+    return {
+      username: username,
+      startTime: "",
+      messages: [],
+      message: "",
+      helloworld: helloworld,
+      defaultMessage: defaultMessageList,
       defaultApi: {
         root: '',
         chat: { path: '/iems/chatbot', method: 'POST' }
@@ -69,54 +87,65 @@ export default {
     this.startTime = this.getCurrentTime();
   },
   methods: {
-      getCurrentTime() {
-        const now = new Date();
-        const hours = now.getHours().toString().padStart(2, "0");
-        const minutes = now.getMinutes().toString().padStart(2, "0");
-        return `${hours}:${minutes}`;
-      },
-      pickMessage(askMsg) {
-        this.message = askMsg
-        this.sendMessage()
-      },
-      addMessage(message, type) {
-        const msg = {}
-        msg.content = message
-        msg.type = type
-        msg.timestamp = this.getCurrentTime()
-        this.messages.push(msg)
-      },
-      async sendMessage () {
-        if (this.message.trim() === '') {
-          return false
-        }
-        // merge api.chat
-        let mergedReq = this.defaultApi.chat;
-        if (this.api &&　this.api.chat) {
-          mergedReq = { ...mergedReq, ...this.api.chat };
-        }
-        let mergedRoot = this.defaultApi.root;
-        if (this.api &&　this.api.root) {
-          mergedRoot = this.api.root;
-        }
-        this.addMessage(this.message, "user")
-        var formData = new FormData();
-        formData.append('question', this.message);
-        const params = "index=iEMS_index&method=similarity"
-        this.message = ""
-        try {
-          // const resp = await chatbotAPI.requestSearch(formData, params)
-          const resp = await chatbotAPI.requestPOST (mergedRoot + mergedReq.path, params, formData)
-          if (resp.data != null && resp.data.errCode === 0) {
-            this.addMessage(resp.data.data, "bot")
-          } else {
-            this.addMessage("Error fetching response", "bot")
-          }
-        } catch (error) {
-          this.addMessage("Connection error", "bot")
-        }
+    getFirstCharacter() {
+      const name = this.username;
+      // Check if the input name is not empty
+      if (name && typeof name === 'string') {
+        // Use the charAt(0) method to get the first character
+        return name.charAt(0);
+      } else {
+        // Handle invalid input or empty string
+        return 'U';
       }
     },
+    getCurrentTime() {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, "0");
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      return `${hours}:${minutes}`;
+    },
+    pickMessage(askMsg) {
+      this.message = askMsg
+      this.sendMessage()
+    },
+    addMessage(message, type) {
+      const msg = {}
+      msg.content = message
+      msg.type = type
+      msg.timestamp = this.getCurrentTime()
+      this.messages.push(msg)
+    },
+    async sendMessage () {
+      if (this.message.trim() === '') {
+        return false
+      }
+      // merge api.chat
+      let mergedReq = this.defaultApi.chat;
+      if (this.api &&　this.api.chat) {
+        mergedReq = { ...mergedReq, ...this.api.chat };
+      }
+      let mergedRoot = this.defaultApi.root;
+      if (this.api &&　this.api.root) {
+        mergedRoot = this.api.root;
+      }
+      this.addMessage(this.message, "user")
+      var formData = new FormData();
+      formData.append('question', this.message);
+      const params = "index=iEMS_index&method=similarity"
+      this.message = ""
+      try {
+        // const resp = await chatbotAPI.requestSearch(formData, params)
+        const resp = await chatbotAPI.requestPOST (mergedRoot + mergedReq.path, params, formData)
+        if (resp.data != null && resp.data.errCode === 0) {
+          this.addMessage(resp.data.data, "bot")
+        } else {
+          this.addMessage("Error fetching response", "bot")
+        }
+      } catch (error) {
+        this.addMessage("Connection error", "bot")
+      }
+    }
+  },
 };
 </script>
 

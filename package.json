@@ -1,6 +1,6 @@
 {
   "name": "xhihha1-vue-plugin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "learn how to create vue plugin component and push to npm.",
   "main": "src/index.js",
   "scripts": {
