@@ -1,6 +1,5 @@
 <template>
   <div class="aiBot">
-    12312
     <div class="chatContain">
       <div class="aiBotBox">
         <div class="boxContent">
@@ -46,7 +45,9 @@
 <script>
 import chatbotAPI from './api/chatbot'
 export default {
-  props: {},
+  props: {
+    api: { type: Object }
+  },
   data() {
     return {
       startTime: "",
@@ -57,7 +58,11 @@ export default {
         "該場域年度契約容量為何?",
         "請問哪台配備負載量最高?",
         "時間電價區間為何?",
-      ]
+      ],
+      defaultApi: {
+        root: '',
+        chat: { path: '/iems/chatbot', method: 'POST' }
+      }
     };
   },
   created() {
@@ -85,13 +90,23 @@ export default {
         if (this.message.trim() === '') {
           return false
         }
+        // merge api.chat
+        let mergedReq = this.defaultApi.chat;
+        if (this.api &&　this.api.chat) {
+          mergedReq = { ...mergedReq, ...this.api.chat };
+        }
+        let mergedRoot = this.defaultApi.root;
+        if (this.api &&　this.api.root) {
+          mergedRoot = this.api.root;
+        }
         this.addMessage(this.message, "user")
         var formData = new FormData();
         formData.append('question', this.message);
         const params = "index=iEMS_index&method=similarity"
         this.message = ""
         try {
-          const resp = await chatbotAPI.requestSearch(formData, params)
+          // const resp = await chatbotAPI.requestSearch(formData, params)
+          const resp = await chatbotAPI.requestPOST (mergedRoot + mergedReq.path, params, formData)
           if (resp.data != null && resp.data.errCode === 0) {
             this.addMessage(resp.data.data, "bot")
           } else {
