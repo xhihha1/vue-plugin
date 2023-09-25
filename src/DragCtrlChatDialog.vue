@@ -8,11 +8,11 @@
     </div>
     <div class="fixDialog" v-show="showChatbot">
       <div class="fixDialogTitleArea">
-        <span> 智能AI專家</span>
+        <span>{{ dialogTitle }}</span>
         <span class="fixDialogClose" @click="closeDone">&times;</span>
       </div>
       <div class="fixDialogContentArea">
-        <second-component></second-component>
+        <second-component :api="api" :msg="msg"></second-component>
       </div>
     </div>
   </div>
@@ -24,10 +24,22 @@ export default {
   components: {
     SecondComponent,
   },
+  props: {
+    user: { type: Object },
+    api: { type: Object },
+    msg: {
+      type: Object
+    }
+  },
   data() {
+    const dialogTitle = '智能AI專家';
+    if (this.msg && this.msg.title) {
+      dialogTitle = this.msg.title;
+    }
     return {
       showChatbot: false,
       chatbotWidth: 300,
+      dialogTitle: dialogTitle
     };
   },
   mounted() {
