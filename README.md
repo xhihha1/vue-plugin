@@ -31,7 +31,8 @@ prop 包含 `config`, `api`, `msg` 三個屬性
     config: {
         name: String,
         showName: Boolean,
-        mic: Boolean
+        mic: Boolean,
+        inputDefaultStr: String
     }
 
     api: {

@@ -39,7 +39,11 @@ export default {
     return {
       showChatbot: false,
       chatbotWidth: 300,
-      dialogTitle: dialogTitle
+      dialogTitle: dialogTitle,
+      btnPosition: {
+        x: '5px',
+        y: '5px'
+      }
     };
   },
   mounted() {
@@ -58,10 +62,21 @@ export default {
   methods: {
     closeDone() {
       this.showChatbot = false;
-      this.snapToEdge();
+      this.resetBtnPosition();
     },
     toggleChatbot() {
       this.showChatbot = !this.showChatbot;
+      if (this.showChatbot) {
+        const button = this.$refs.buttonElement;
+        this.btnPosition.x = button.style.left;
+        this.btnPosition.y = button.style.top;
+        console.log(this.btnPosition.x, this.btnPosition.y)
+      }
+    },
+    resetBtnPosition () {
+      const button = this.$refs.buttonElement;
+      button.style.left = this.btnPosition.x;
+      button.style.top = this.btnPosition.y;
     },
     makeCode() {},
     snapToEdge() {

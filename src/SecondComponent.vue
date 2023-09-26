@@ -30,7 +30,7 @@
     <div class="chatInputArea">
       <div><span class="chatName" v-if="showName">{{ getFirstCharacter(username) }}</span></div>
         <div class="chatInputDiv">
-          <input type="text" class="chatInput" placeholder="請輸入訊息" v-model="message" @keyup.enter="sendMessage"/>
+          <input type="text" class="chatInput" :placeholder="placeholder" v-model="message" @keyup.enter="sendMessage"/>
         </div>
         <div>
           <button class="chatMic" v-show="showMic"></button>
@@ -60,6 +60,7 @@ export default {
         "請問哪台配備負載量最高?",
         "時間電價區間為何?",
     ];
+    let placeholder = '請輸入訊息';
     let username = 'Guest';
     let showMic = true;
     let showName = true;
@@ -81,8 +82,12 @@ export default {
       if (typeof(this.config.mic)!== 'undefined') {
         showMic = this.config.mic;
       }
+      if (this.config.inputDefaultStr) {
+        placeholder = this.config.inputDefaultStr;
+      }
     }
     return {
+      placeholder: placeholder,
       showName: showName,
       showMic: showMic,
       username: username,
@@ -110,6 +115,9 @@ export default {
       }
       if (typeof(newVal.mic)!== 'undefined') {
         this.showMic = newVal.mic;
+      }
+      if (newVal.inputDefaultStr) {
+        this.placeholder = newVal.inputDefaultStr;
       }
     },
     api () {
@@ -272,6 +280,7 @@ export default {
       border-bottom-right-radius: 20px;
       border-bottom-left-radius: 20px;
       padding: 8px 12px;
+      text-align: left;
   }
   .selfBox .chatArea .contentSpan{
       background-color: #C6E6F9;
@@ -303,6 +312,7 @@ export default {
       background-color: #FFFFFF;
       box-sizing: border-box;
       padding: 0px 5px;
+      text-align: left;
   }
   .aiBotBox .chatArea li:hover{
       color: #FFFFFF;
