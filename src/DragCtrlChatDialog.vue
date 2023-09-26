@@ -32,7 +32,7 @@ export default {
     }
   },
   data() {
-    const dialogTitle = '智能AI專家';
+    let dialogTitle = '智能AI專家';
     if (this.msg && this.msg.title) {
       dialogTitle = this.msg.title;
     }
@@ -58,6 +58,7 @@ export default {
   methods: {
     closeDone() {
       this.showChatbot = false;
+      this.snapToEdge();
     },
     toggleChatbot() {
       this.showChatbot = !this.showChatbot;

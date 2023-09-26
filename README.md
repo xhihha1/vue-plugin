@@ -24,20 +24,29 @@ Use:
 
 # Vue Prop:  
 
-prop 包含 `user`, `api`, `msg` 三個屬性  
+prop 包含 `config`, `api`, `msg` 三個屬性  
     
     <second-component :api="api" :msg="msg"></second-component>
 
-    user: {
-        name: String
+    config: {
+        name: String,
+        showName: Boolean,
+        mic: Boolean
     }
 
     api: {
         root: '', // 根路徑  
-        chat: { path: '/iems/chatbot', method: 'POST' } // chat 接口 api  
+        chat: {  
+            path: '/iems/chatbot',
+            method: 'POST'
+            params: {
+                resourceId: "984"
+            }
+        } // chat 接口 api  
     }
 
     msg: {
+        title: 'title', // Dialog title
         helloworld: String,
         list: Array String
     }

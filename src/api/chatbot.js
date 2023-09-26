@@ -20,7 +20,7 @@ function requestSearch (formData, param) {
 }
 
 function requestPOST (path, param, formData) {
-  console.log(`${path}?${param}`, param)
+
   const p = new Promise((resolve, reject) => {
     const params = {
       url: `${path}?${param}`,
@@ -39,7 +39,27 @@ function requestPOST (path, param, formData) {
   return p
 }
 
+function requestGET (path, param) {
+
+  const p = new Promise((resolve, reject) => {
+    const params = {
+      url: `${path}?${param}`,
+      method: 'GET',
+      timeout: {
+        client: 10 * 1000
+      }
+    }
+    axios(params).then(data => {
+      resolve(data)
+    }).catch(error => {
+      reject(error)
+    })
+  })
+  return p
+}
+
 export default {
     requestSearch,
-    requestPOST
+    requestPOST,
+    requestGET
 }

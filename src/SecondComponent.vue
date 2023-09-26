@@ -28,12 +28,12 @@
       </div>
     </div>
     <div class="chatInputArea">
-      <div><span class="chatName">{{ getFirstCharacter() }}</span></div>
+      <div><span class="chatName" v-if="showName">{{ getFirstCharacter(username) }}</span></div>
         <div class="chatInputDiv">
           <input type="text" class="chatInput" placeholder="請輸入訊息" v-model="message" @keyup.enter="sendMessage"/>
         </div>
         <div>
-          <button class="chatMic"></button>
+          <button class="chatMic" v-show="showMic"></button>
         </div>
         <div>
           <button type="text" class="chatNext" @click="sendMessage"></button>
@@ -46,7 +46,7 @@
 import chatbotAPI from './api/chatbot'
 export default {
   props: {
-    user: { type: Object },
+    config: { type: Object },
     api: { type: Object },
     msg: {
       type: Object
@@ -61,16 +61,30 @@ export default {
         "時間電價區間為何?",
     ];
     let username = 'Guest';
-    if (this.msg && this.msg.helloworld) {
-      helloworld = this.msg.helloworld;
+    let showMic = true;
+    let showName = true;
+    if (this.msg) {
+      if (this.msg.helloworld) {
+        helloworld = this.msg.helloworld;
+      }
+      if (Array.isArray(this.msg.list)) {
+        defaultMessageList = this.msg.list;
+      }
     }
-    if (this.msg && Array.isArray(this.msg.list)) {
-      defaultMessageList = this.msg.list;
-    }
-    if (this.user && this.user.name) {
-      username = this.user.name;
+    if (this.config) {
+      if (this.config.name) {
+        username = this.config.name;
+      }
+      if (typeof(this.config.showName) === 'boolean') {
+        showName = this.config.showName;
+      }
+      if (typeof(this.config.mic)!== 'undefined') {
+        showMic = this.config.mic;
+      }
     }
     return {
+      showName: showName,
+      showMic: showMic,
       username: username,
       startTime: "",
       messages: [],
@@ -79,16 +93,40 @@ export default {
       defaultMessage: defaultMessageList,
       defaultApi: {
         root: '',
-        chat: { path: '/iems/chatbot', method: 'POST' }
+        chat: { path: '/iEMS/chatbot', method: 'POST' }
       }
     };
   },
   created() {
     this.startTime = this.getCurrentTime();
   },
+  watch:{
+    config (newVal)  {
+      if (newVal && newVal.name) {
+        this.username = newVal.name;
+      }
+      if (typeof(newVal.showName) === 'boolean') {
+        this.showName = newVal.showName;
+      }
+      if (typeof(newVal.mic)!== 'undefined') {
+        this.showMic = newVal.mic;
+      }
+    },
+    api () {
+
+    },
+    msg (newVal) {
+      if (newVal && newVal.helloworld) {
+        this.helloworld = newVal.helloworld;
+      }
+      if (newVal && Array.isArray(newVal.list)) {
+        this.defaultMessage = newVal.list;
+      }
+    }
+  },
   methods: {
-    getFirstCharacter() {
-      const name = this.username;
+    getFirstCharacter(username) {
+      const name = username;
       // Check if the input name is not empty
       if (name && typeof name === 'string') {
         // Use the charAt(0) method to get the first character
@@ -97,6 +135,11 @@ export default {
         // Handle invalid input or empty string
         return 'U';
       }
+    },
+    objectToUrlParameters (obj) {
+      return Object.entries(obj)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join('&');
     },
     getCurrentTime() {
       const now = new Date();
@@ -129,15 +172,33 @@ export default {
         mergedRoot = this.api.root;
       }
       this.addMessage(this.message, "user")
-      var formData = new FormData();
-      formData.append('question', this.message);
-      const params = "index=iEMS_index&method=similarity"
+      // var formData = new FormData();
+      // formData.append('question', this.message);
+      const reqData = {
+        "messages": [
+          {
+            "role": "user",
+            "content": this.message
+          }
+        ]
+      }
+      if (mergedReq.params) {
+        reqData.params = mergedReq.params
+      }
+      const params = ""
       this.message = ""
       try {
         // const resp = await chatbotAPI.requestSearch(formData, params)
-        const resp = await chatbotAPI.requestPOST (mergedRoot + mergedReq.path, params, formData)
-        if (resp.data != null && resp.data.errCode === 0) {
-          this.addMessage(resp.data.data, "bot")
+        let resp = '';
+        if (mergedReq.method.toUpperCase === 'GET') {
+          resp = await chatbotAPI.requestGET (mergedRoot + mergedReq.path, this.objectToUrlParameters(reqData.params))
+        } else {
+          resp = await chatbotAPI.requestPOST (mergedRoot + mergedReq.path, params, reqData)
+        }
+        if (resp.data != null && resp.data.isError === false && Array.isArray(resp.data.messages)) {
+          for (let i = 0; i < resp.data.messages.length; i++) {
+            this.addMessage(resp.data.messages[i].content, "bot")
+          }
         } else {
           this.addMessage("Error fetching response", "bot")
         }
@@ -240,6 +301,8 @@ export default {
       border: 1px solid #2A9ED7;
       color: #2A9ED7;
       background-color: #FFFFFF;
+      box-sizing: border-box;
+      padding: 0px 5px;
   }
   .aiBotBox .chatArea li:hover{
       color: #FFFFFF;
